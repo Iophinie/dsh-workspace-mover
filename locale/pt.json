@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Mover conversas",
+    "description": "Move uma conversa para outra área de trabalho a partir do menu da barra lateral. A conversa continua lá com todo o histórico sob um novo identificador de sessão, e a conversa original é arquivada: sai do agrupamento, mas continua disponível na lista de arquivadas. Uma conversa com trabalho em execução ou sem nenhum turno concluído é recusada.",
+    "detail": "docs/DETAIL.md"
+  }
+}

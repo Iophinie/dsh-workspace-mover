@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Déplacer des conversations",
+    "description": "Déplace une conversation vers un autre espace de travail depuis le menu de la barre latérale. La conversation y continue avec tout son historique sous un nouvel identifiant de session, et la conversation d’origine est archivée : elle quitte le regroupement mais reste accessible dans la liste des conversations archivées. Une conversation en cours d’exécution ou sans tour terminé est refusée.",
+    "detail": "docs/DETAIL.md"
+  }
+}

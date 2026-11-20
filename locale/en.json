@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Workspace mover",
+    "description": "Moves a chat into another workspace from its sidebar menu. The chat continues there with its full history under a new session id, and the original chat is archived, so it leaves the grouping but stays recoverable from the archived list. A chat with running work or without a completed turn is refused.",
+    "detail": "docs/DETAIL.md"
+  }
+}

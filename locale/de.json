@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Chats verschieben",
+    "description": "Verschiebt einen Chat über das Menü der Seitenleiste in einen anderen Arbeitsbereich. Der Chat wird dort mit vollständiger Historie unter einer neuen Sitzungs-ID fortgesetzt, der ursprüngliche Chat wird archiviert und verlässt damit die Gruppierung, bleibt aber in der Archivliste wiederherstellbar. Ein Chat mit laufender Arbeit oder ohne abgeschlossenen Turn wird abgelehnt.",
+    "detail": "docs/DETAIL.md"
+  }
+}

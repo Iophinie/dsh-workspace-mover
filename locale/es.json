@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Mover conversaciones",
+    "description": "Mueve una conversación a otro espacio de trabajo desde el menú de la barra lateral. La conversación continúa allí con todo su historial bajo un nuevo identificador de sesión, y la conversación original se archiva: sale de la agrupación pero sigue disponible en el listado de archivadas. Se rechaza una conversación con trabajo en curso o sin ningún turno completado.",
+    "detail": "docs/DETAIL.md"
+  }
+}
