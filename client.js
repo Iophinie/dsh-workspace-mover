@@ -96,6 +96,47 @@ window.__ModuleLoader__.load({
     }
 
     /**
+     * Highlight rectangle for the workspace a dragged chat would land in. The
+     * sidebar owns its rows, so the drop feedback is this frame-wide overlay
+     * instead of a class on the row.
+     */
+    const dropHint = (() => {
+      let current = null
+      const listeners = new Set()
+      const emit = () => { for (const listener of [...listeners]) listener() }
+      return {
+        get: () => current,
+        subscribe(listener) {
+          listeners.add(listener)
+          return () => { listeners.delete(listener) }
+        },
+        set(value) {
+          current = value
+          emit()
+        },
+      }
+    })()
+
+    /** Draw the current drop highlight, or nothing. */
+    function DropHint() {
+      const rect = React.useSyncExternalStore(dropHint.subscribe, dropHint.get)
+      if (rect === null) return null
+      return h('div', {
+        className: 'wm-drop',
+        'aria-hidden': true,
+        style: {
+          top: `${rect.top}px`,
+          left: `${rect.left}px`,
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
+        },
+      },
+      h('style', null, '.wm-drop{position:fixed;border-radius:8px;pointer-events:none;z-index:2147481200;'
+        + 'background:color-mix(in srgb, var(--dsw-alias-brand-primary) 14%, transparent);'
+        + 'box-shadow:inset 0 0 0 1px var(--dsw-alias-brand-primary);}'))
+    }
+
+    /**
      * Render one rejected value as a single line of text.
      * @param {unknown} value - failure from the Remote call.
      * @returns {string} message without a stack.
@@ -224,6 +265,92 @@ window.__ModuleLoader__.load({
             }]
           },
         }), 'workspace-mover: session menu')
+
+        // The highlight overlay for drag & drop.
+        ctx.effect(() => ctx.slots.inject('shell.overlay', () => ctx.slots.register({
+          name: 'shell.overlay',
+          id: 'workspace-mover.drop-hint',
+          order: 92,
+        }, DropHint)), 'workspace-mover: drop hint')
+
+        // Drag a chat row onto another workspace — its header row or any chat
+        // inside it — and the same move runs as from the menu. A drop inside the
+        // source workspace keeps the sidebar's own reordering.
+        const SESSION_PREFIX = 'session:'
+        const WORKSPACE_PREFIX = 'workspace:'
+        ctx.effect(() => {
+          /** Session id being dragged, or null. */
+          let dragged = null
+          /** Workspace that currently holds a session, from the live snapshot. */
+          const workspaceOf = (sessionId) => {
+            const snapshot = ctx.workspaces.list.getSnapshot()
+            const item = snapshot.items.find(candidate => candidate.sessionIds.includes(sessionId))
+            return item === undefined ? undefined : item.workspaceId
+          }
+          /** The workspace a pointer position would drop into. */
+          const targetOf = (event) => {
+            if (!(event.target instanceof Element)) return null
+            const workspaceRow = event.target.closest('[data-row-key^="workspace:"]')
+            if (workspaceRow !== null) {
+              const id = (workspaceRow.getAttribute('data-row-key') ?? '').slice(WORKSPACE_PREFIX.length)
+              return id === '' ? null : { workspaceId: id, row: workspaceRow }
+            }
+            const sessionRow = event.target.closest('[data-row-key^="session:"]')
+            if (sessionRow === null) return null
+            const sessionId = (sessionRow.getAttribute('data-row-key') ?? '').slice(SESSION_PREFIX.length)
+            const workspaceId = workspaceOf(sessionId)
+            return workspaceId === undefined ? null : { workspaceId, row: sessionRow }
+          }
+          const onDragStart = (event) => {
+            if (!(event.target instanceof Element)) {
+              dragged = null
+              return
+            }
+            const row = event.target.closest('[data-row-key]')
+            const key = row === null ? null : row.getAttribute('data-row-key')
+            dragged = key !== null && key.startsWith(SESSION_PREFIX) ? key.slice(SESSION_PREFIX.length) : null
+            dropHint.set(null)
+          }
+          const onDragOver = (event) => {
+            if (dragged === null) return
+            const target = targetOf(event)
+            if (target === null || target.workspaceId === workspaceOf(dragged)) {
+              dropHint.set(null)
+              return
+            }
+            event.preventDefault()
+            if (event.dataTransfer !== null) event.dataTransfer.dropEffect = 'move'
+            const rect = target.row.getBoundingClientRect()
+            dropHint.set({ top: rect.top, left: rect.left, width: rect.width, height: rect.height })
+          }
+          const onDrop = (event) => {
+            if (dragged === null) return
+            const target = targetOf(event)
+            const sessionId = dragged
+            dragged = null
+            dropHint.set(null)
+            if (target === null || target.workspaceId === workspaceOf(sessionId)) return
+            event.preventDefault()
+            event.stopPropagation()
+            const item = ctx.workspaces.list.getSnapshot().items.find(candidate => candidate.workspaceId === target.workspaceId)
+            void move(sessionId, { workspaceId: target.workspaceId, title: item === undefined ? target.workspaceId : item.title })
+          }
+          const clear = () => {
+            dragged = null
+            dropHint.set(null)
+          }
+          document.addEventListener('dragstart', onDragStart, true)
+          document.addEventListener('dragover', onDragOver, true)
+          document.addEventListener('drop', onDrop, true)
+          document.addEventListener('dragend', clear, true)
+          return () => {
+            document.removeEventListener('dragstart', onDragStart, true)
+            document.removeEventListener('dragover', onDragOver, true)
+            document.removeEventListener('drop', onDrop, true)
+            document.removeEventListener('dragend', clear, true)
+            dropHint.set(null)
+          }
+        }, 'workspace-mover: drag and drop')
       },
     }
   },

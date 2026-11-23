@@ -11,7 +11,14 @@ workspaces as a submenu. The workspace that already holds the chat is not offere
 and an archived chat shows no action. With a single registered workspace there is
 nothing to choose, so the row is not shown either.
 
-The same operation is available as the `/move-workspace` slash command
+The same operation is available by **dragging the chat row**: pick it up and drop it
+on another folder's header or on any chat inside that folder. The target row
+highlights while you hover, and the drop runs the same move as the menu. Dropping
+inside the current folder keeps the sidebar's own reordering; only a drop on a
+different folder starts a move. Rows the sidebar does not let you drag (archived
+chats and blank chats) cannot be moved this way — use the menu.
+
+The same operation is also available as the `/move-workspace` slash command
 (for example `/move-workspace Джарвис`) and as the `move_chat` agent tool.
 
 ## What a move does

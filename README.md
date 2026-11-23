@@ -4,6 +4,8 @@ Move a saved chat from one workspace into another, with its history, without
 leaving the shell.
 
 Right-click a chat in the sidebar → **Move to workspace** → pick the target.
+Or **drag the chat row onto another folder** in the sidebar — its header or any
+chat inside it — and drop it there.
 
 ## What it does
 
@@ -27,12 +29,17 @@ all-or-nothing.
 | Entry point | How |
 | --- | --- |
 | Session menu | Right-click the session row (or use its **...** button) → **Move to workspace** → workspace |
+| Drag & drop | Drag the chat row onto another folder's header or any chat inside it; the target folder highlights while you hover |
 | Slash command | `/move-workspace <workspace id, exact title, or absolute path>` |
 | Agent tool | `move_chat` with `session` and `workspace` |
 
 The menu offers every other workspace, never the one that already holds the chat,
 and skips archived chats. When only one workspace exists there is nothing to
 choose, so the row is not shown.
+
+Dragging inside the same folder keeps the sidebar's own reordering; only a drop on
+a different folder starts a move. A row that cannot be dragged by the sidebar
+(archived, or a blank chat) cannot be moved this way either — use the menu.
 
 ## Install
 
@@ -75,7 +82,7 @@ to `dependencies` and the same name to `dsh.profile.bundles`.
 | --- | --- |
 | `index.js` | Host half: registers the `/move-workspace` command and the `move_chat` tool |
 | `lib/move.js` | The move itself: completed-turn prefix, route and preset folding, replay, rollback |
-| `client.js` | Client half: the session menu action, its submenu, its glyph, and the toast |
+| `client.js` | Client half: the session menu action, its submenu, its glyph, the toast, drag & drop onto another folder, and the drop highlight |
 | `cordis.patch.yml` | Bundle patch that mounts the plugin |
 | `locale/*.json` | Plugin metadata: en, zh, ru, ja, es, fr, de, pt |
 | `test/move.test.mjs` | Checks over the log folds and over `moveSession` against stub services |
